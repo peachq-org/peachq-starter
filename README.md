@@ -7,7 +7,8 @@ q that any runner may download. Click **Use this template**, or copy the workflo
 # .github/workflows/peachq.yml
 steps:
   - uses: actions/checkout@<sha>
-  - uses: peachq-org/setup-peachq@<sha>
+    with: {persist-credentials: false}
+  - uses: peachq-org/setup-peachq@v1.0.0
     with:
       version: 0.92.20261116
   - run: $QCMD tests/run.q -classic
