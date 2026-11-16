@@ -9,7 +9,7 @@ steps:
   - uses: actions/checkout@<sha>
   - uses: peachq-org/setup-peachq@<sha>
     with:
-      version: 0.92.20261115
+      version: 0.92.20261116
   - run: $QCMD tests/run.q -classic
   - if: always()
     uses: actions/upload-artifact@<sha>
