@@ -1,0 +1,3 @@
+QCI_ENTRY=src:fizz.q
+QCI_TESTS=$QCMD tests/run.q
+QCI_TIMEOUT=60

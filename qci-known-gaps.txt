@@ -1,0 +1,2 @@
+# Checks known to fail on peachq, one per line: `<check>  # why`. Check names are those in qci-results/peachq.csv.
+# An unlisted failure fails the run, and so does a listed check that now passes: this list only shrinks.

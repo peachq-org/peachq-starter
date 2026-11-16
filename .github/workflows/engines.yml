@@ -1,0 +1,50 @@
+name: q engines
+
+# Runs the checks on peachq and on every other q engine the runner provides, then tabulates them side by side.
+# peachq is the only engine installed here; provide any other yourself (README: "Comparing engines").
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: Directory holding the .qci to run
+        default: examples/qunit
+
+permissions:
+  contents: read
+
+jobs:
+  engines:
+    runs-on: ${{ vars.QCI_RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: peachq-org/setup-peachq@e05ce6dac3096030bc0685c768a84fb4dd00af4c # initial branch head: setup-peachq has no release yet
+        with:
+          version: 0.92.20261115
+
+      - name: engines from repository variables
+        env:
+          VAR_KX_Q: ${{ vars.KX_Q }}
+          VAR_KORZE_Q: ${{ vars.KORZE_Q }}
+          VAR_L_Q: ${{ vars.L_Q }}
+        run: |
+          for v in KX_Q KORZE_Q L_Q; do
+            val=$(printenv "VAR_$v" || true)
+            [ -z "$val" ] || echo "$v=$val" >> "$GITHUB_ENV"
+          done
+
+      - name: qci on every engine
+        working-directory: ${{ inputs.project }}
+        run: '"$GITHUB_WORKSPACE/qci.sh" all'
+
+      - name: compare
+        if: always()
+        working-directory: ${{ inputs.project }}
+        run: '"$GITHUB_WORKSPACE/qci.sh" compare'
+
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: qci-engines
+          path: ${{ inputs.project }}/qci-results
+          if-no-files-found: ignore

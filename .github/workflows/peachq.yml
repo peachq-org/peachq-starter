@@ -1,0 +1,59 @@
+name: runs on peachq
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    name: ${{ matrix.project }} on peachq ${{ matrix.peachq }} (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+        # The pinned build is the verdict; latest warns early of a change in peachq.
+        peachq: [0.92.20261115, latest]
+        # Your project: replace these with `.` (or the directories holding a .qci).
+        project: [examples/loads-only, examples/own-tests, examples/qunit]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: peachq-org/setup-peachq@e05ce6dac3096030bc0685c768a84fb4dd00af4c # initial branch head: setup-peachq has no release yet
+        with:
+          version: ${{ matrix.peachq }}
+
+      - name: qci
+        working-directory: ${{ matrix.project }}
+        run: '"$GITHUB_WORKSPACE/qci.sh"'
+
+      - name: results table
+        if: always()
+        working-directory: ${{ matrix.project }}
+        run: '"$GITHUB_WORKSPACE/qci.sh" compare'
+
+      - if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: qci-${{ strategy.job-index }}-${{ matrix.os }}-${{ matrix.peachq }}
+          path: ${{ matrix.project }}/qci-results
+          if-no-files-found: ignore
+
+  selftest:
+    name: qci.sh selftest (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: peachq-org/setup-peachq@e05ce6dac3096030bc0685c768a84fb4dd00af4c # initial branch head: setup-peachq has no release yet
+        with:
+          version: 0.92.20261115
+      - run: test/selftest.sh

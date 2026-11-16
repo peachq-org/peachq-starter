@@ -1,0 +1,4 @@
+QCI_ENTRY=src:math.q
+QCI_TESTS=$QCMD tests/run.q
+QCI_JUNIT=qci-junit.xml
+QCI_TIMEOUT=120
