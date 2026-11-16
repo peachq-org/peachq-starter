@@ -9,7 +9,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       # Without the action: curl -fsSLO https://github.com/peachq-org/peachq/releases/download/v0.92/peachq-linux-x86_64.tar.gz{,.sha256}, sha256sum -c, tar -x
-      - uses: peachq-org/setup-peachq@105c8d7dd3b7600acee69525501f23cc31f99d9f # PR head until setup-peachq is tagged
+      - uses: peachq-org/setup-peachq@c66a4579d8d253e5467cc2d1647a20a440737931 # v1
         with:
           version: 0.92.20261115
       - run: $QCMD tests/run.q -classic
