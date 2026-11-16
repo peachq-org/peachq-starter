@@ -1,57 +1,20 @@
 name: runs on peachq
-
-on:
-  push:
-    branches: [main]
-  pull_request:
-  workflow_dispatch:
-
+on: [push, pull_request]
 permissions:
   contents: read
-
 jobs:
-  check:
-    name: ${{ matrix.project }} on peachq ${{ matrix.peachq }} (${{ matrix.os }})
-    strategy:
-      fail-fast: false
-      matrix:
-        os:
-          - ubuntu-latest
-          # - macos-latest    # Linux by default; add macOS if you ship on Mac
-        # The pinned build is the verdict; latest warns early of a change in peachq.
-        peachq: [0.92.20261115, latest]
-        # Your project: replace these with `.` (or the directories holding a .qci).
-        project: [examples/loads-only, examples/own-tests, examples/qunit]
-    runs-on: ${{ matrix.os }}
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-
-      - uses: peachq-org/setup-peachq@105c8d7dd3b7600acee69525501f23cc31f99d9f # initial branch head: setup-peachq has no release yet
+      # Without the action: curl -fsSLO https://github.com/peachq-org/peachq/releases/download/v0.92/peachq-linux-x86_64.tar.gz{,.sha256}, sha256sum -c, tar -x
+      - uses: peachq-org/setup-peachq@105c8d7dd3b7600acee69525501f23cc31f99d9f # PR head until setup-peachq is tagged
         with:
-          version: ${{ matrix.peachq }}
-
-      - name: qci
-        working-directory: ${{ matrix.project }}
-        run: '"$GITHUB_WORKSPACE/qci.sh"'
-
-      - name: results table
-        if: always()
-        working-directory: ${{ matrix.project }}
-        run: '"$GITHUB_WORKSPACE/qci.sh" compare'
-
+          version: 0.92.20261115
+      - run: $QCMD tests/run.q -classic
       - if: always()
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: qci-${{ strategy.job-index }}-${{ matrix.os }}-${{ matrix.peachq }}
-          path: ${{ matrix.project }}/qci-results
-          if-no-files-found: ignore
-
-  selftest:
-    name: qci.sh selftest
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: peachq-org/setup-peachq@105c8d7dd3b7600acee69525501f23cc31f99d9f # initial branch head: setup-peachq has no release yet
-        with:
-          version: 0.92.20261115
-      - run: test/selftest.sh
+          name: peachq-junit
+          path: junit.xml
