@@ -43,12 +43,9 @@ exit 0;
 Replace the `run:` line with your runner's command, for example `$QCMD tests/all.q -classic`. Its exit code is the
 verdict. Upload whatever JUnit XML it writes as `peachq-junit`.
 
-## Known gaps
+## Failures on peachq
 
-`peachq-known-gaps.txt` lists tests known to fail on peachq, one per line: `.mathTest.testName  # why`. On peachq,
-`tests/run.q` fails on any unlisted failure, and also on a listed test that now passes, so the list only shrinks.
-
-Think a failure is a peachq bug? Raise an issue: https://github.com/peachq-org/peachq/issues/new?template=compat.yml
+If some tests are known to fail on peachq, list them however your runner allows. Think a failure is a peachq bug? Raise an issue: https://github.com/peachq-org/peachq/issues/new?template=compat.yml
 
 ## Licence
 
