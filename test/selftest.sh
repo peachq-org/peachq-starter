@@ -3,6 +3,7 @@
 set -uo pipefail
 QCI=$(cd "$(dirname "$0")/.." && pwd)/qci.sh
 PQ=${PEACHQ_Q:?set PEACHQ_Q to a peachq q}
+PQ=$(cd "$(dirname "$PQ")" && pwd)/$(basename "$PQ")
 work=$(mktemp -d)
 trap 'rm -rf "$work"' EXIT
 fails=0
