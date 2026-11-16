@@ -79,10 +79,22 @@ start=$(date +%s)
 expect 1 "a hung test times out, children and all" PEACHQ_Q="$PQ" "$QCI"
 [ $(($(date +%s) - start)) -lt 20 ] || fail "the timeout took $(($(date +%s) - start))s"
 has qci-results/peachq.csv '"tests","timeout","no answer in 2s"'
+echo 'tests  # tree-bug: listed, but a timeout is never a known gap' > qci-known-gaps.txt
+expect 1 "a known gap never hides a timeout" PEACHQ_Q="$PQ" "$QCI"
+
+long=$(printf 'x%.0s' $(seq 1 3000))
+project 'QCI_TESTS=cp "$QCI_ENGINE.xml" out.xml' 'QCI_JUNIT=out.xml'
+printf '<testsuite><testcase name="%s"/></testsuite>\n' "$long" > l.xml
+printf '<testsuite><testcase name="%s"><failure message="no"/></testcase></testsuite>\n' "$long" > peachq.xml
+echo "test:$long  # tree-bug: a long name" > qci-known-gaps.txt
+printf '#!/bin/sh\nexec "%s" "$@"\n' "$PQ" > "$work/other-q" && chmod +x "$work/other-q"
+expect 0 "a long test name runs" PEACHQ_Q="$PQ" L_Q="$work/other-q" "$QCI"
+expect 0 "a long test name still gives one short link" "$QCI" compare
+url=$(grep -o 'https://github.com/peachq-org/peachq/issues/new[^)]*' "$work/out")
+[ "$(printf '%s\n' "$url" | wc -l)" = 1 ] && [ ${#url} -lt 7000 ] || fail "link: ${#url} characters"
 
 project 'QCI_ENTRY=ok.q' 'QCI_TESTS=[ "$QCI_ENGINE" != peachq ]'
 echo 'a:1;' > ok.q
-printf '#!/bin/sh\nexec "%s" "$@"\n' "$PQ" > "$work/other-q" && chmod +x "$work/other-q"
 echo 'tests  # tree-bug: this fixture fails on purpose' > qci-known-gaps.txt
 expect 0 "two engines run, alphabetically" PEACHQ_Q="$PQ" L_Q="$work/other-q" "$QCI"
 has qci-results/l.csv '"tests","pass",""'

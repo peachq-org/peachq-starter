@@ -304,8 +304,8 @@ table() {
   done
 }
 
-# verdict <engine>: one line per unexplained result. Known gaps hold both ways; a failing tests row is explained
-# by the per-test rows when it exited normally and one of them failed
+# verdict <engine>: one line per unexplained result. Known gaps hold both ways but explain only a failure, never a
+# timeout, crash or unreadable report; a failing tests row is explained by a failing per-test row
 verdict() {
   local f
   f=$(gaps_file "$1")
@@ -315,8 +315,9 @@ verdict() {
     END {
       for (i = 1; i <= n; i++) {
         c = order[i]; bad = st[c] != "pass" && st[c] != "skip"
+        gapped = (c in gap) && (st[c] == "fail" || (st[c] == "error" && c ~ /^test:/))
         if (c == "tests" && st[c] == "fail" && testfail) continue
-        if (bad && !(c in gap)) print "unexpected " st[c] ": " c (msg[c] == "" ? "" : " - " msg[c])
+        if (bad && !gapped) print "unexpected " st[c] ": " c (msg[c] == "" ? "" : " - " msg[c])
         if (!bad && (c in gap)) print "now passes: " c " - remove it from " f
       }
     }'
@@ -349,7 +350,7 @@ idfield() { sed -n "s/^$2=//p" "$RESULTS/$1.id" 2> /dev/null; }
 # report_link <all.tsv> <check> <other engine...>: a prefilled compat issue form holding the check, each engine's
 # result and identity - never source - cut to stay under 7000 characters
 report_link() {
-  local all=$1 check=$2 e st engines= other= mine= cap=4000 url
+  local all=$1 check=$2 e st engines= other= mine= cap=4000 url shown=${2:0:300}
   shift 2
   for e in peachq "$@"; do
     engines="$engines$e: $(idfield "$e" label); .z.K=$(idfield "$e" zK) .z.k=$(idfield "$e" zk) .z.v=$(idfield "$e" zv); args=$(idfield "$e" args)
@@ -360,10 +361,10 @@ report_link() {
 "; fi
   done
   while :; do
-    url="$REPORT_URL?template=compat.yml&title=$(urlencode "Compatibility: $check differs from $*")"
-    url="$url&check=$(urlencode "$check")&engines=$(urlencode "$(cut_to $cap "$engines")")"
+    url="$REPORT_URL?template=compat.yml&title=$(urlencode "Compatibility: $shown differs from $*")"
+    url="$url&check=$(urlencode "$shown")&engines=$(urlencode "$(cut_to $cap "$engines")")"
     url="$url&other=$(urlencode "$(cut_to $cap "$other")")&peachq=$(urlencode "$(cut_to $cap "$mine")")"
-    [ ${#url} -lt 7000 ] && break
+    [ ${#url} -lt 7000 ] || [ $cap -lt 100 ] && break
     cap=$((cap / 2))
   done
   printf '%s' "$url"

@@ -18,7 +18,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: peachq-org/setup-peachq@e05ce6dac3096030bc0685c768a84fb4dd00af4c # initial branch head: setup-peachq has no release yet
+      - uses: peachq-org/setup-peachq@93704f5ebfa58ea08efa7e04aa055e7028687e52 # initial branch head: setup-peachq has no release yet
         with:
           version: 0.92.20261115
 
