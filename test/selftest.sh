@@ -91,7 +91,7 @@ printf '#!/bin/sh\nexec "%s" "$@"\n' "$PQ" > "$work/other-q" && chmod +x "$work/
 expect 0 "a long test name runs" PEACHQ_Q="$PQ" L_Q="$work/other-q" "$QCI"
 expect 0 "a long test name still gives one short link" "$QCI" compare
 url=$(grep -o 'https://github.com/peachq-org/peachq/issues/new[^)]*' "$work/out")
-[ "$(printf '%s\n' "$url" | wc -l)" = 1 ] && [ ${#url} -lt 7000 ] || fail "link: ${#url} characters"
+[ "$(printf '%s\n' "$url" | wc -l | tr -d ' ')" = 1 ] && [ ${#url} -lt 7000 ] || fail "link: ${#url} characters"
 
 project 'QCI_ENTRY=ok.q' 'QCI_TESTS=[ "$QCI_ENGINE" != peachq ]'
 echo 'a:1;' > ok.q
