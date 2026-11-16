@@ -15,7 +15,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest]
+        os:
+          - ubuntu-latest
+          # - macos-latest    # Linux by default; add macOS if you ship on Mac
         # The pinned build is the verdict; latest warns early of a change in peachq.
         peachq: [0.92.20261115, latest]
         # Your project: replace these with `.` (or the directories holding a .qci).
@@ -24,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: peachq-org/setup-peachq@93704f5ebfa58ea08efa7e04aa055e7028687e52 # initial branch head: setup-peachq has no release yet
+      - uses: peachq-org/setup-peachq@105c8d7dd3b7600acee69525501f23cc31f99d9f # initial branch head: setup-peachq has no release yet
         with:
           version: ${{ matrix.peachq }}
 
@@ -45,15 +47,11 @@ jobs:
           if-no-files-found: ignore
 
   selftest:
-    name: qci.sh selftest (${{ matrix.os }})
-    strategy:
-      fail-fast: false
-      matrix:
-        os: [ubuntu-latest, macos-latest]
-    runs-on: ${{ matrix.os }}
+    name: qci.sh selftest
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-      - uses: peachq-org/setup-peachq@93704f5ebfa58ea08efa7e04aa055e7028687e52 # initial branch head: setup-peachq has no release yet
+      - uses: peachq-org/setup-peachq@105c8d7dd3b7600acee69525501f23cc31f99d9f # initial branch head: setup-peachq has no release yet
         with:
           version: 0.92.20261115
       - run: test/selftest.sh

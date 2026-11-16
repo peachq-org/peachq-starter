@@ -32,7 +32,8 @@ every push and pull request. This template gives you:
 
    Each line is `KEY=VALUE` with no quotes and no trailing comments. A line starting with `#` is a comment.
 
-3. In `.github/workflows/peachq.yml`, replace the `project:` list with `.`.
+3. In `.github/workflows/peachq.yml`, replace the `project:` list with `.`. It runs on Linux by default. Uncomment
+   `macos-latest` if you ship on Mac.
 4. Run it locally: `PEACHQ_Q=/path/to/peachq/q ./qci.sh`.
 
 Values in the environment override `.qci`. `$QCMD` in `QCI_TESTS` stays literal in the file and is expanded when the
@@ -125,8 +126,19 @@ between two other engines gets no link.
 
 ## Installing peachq without a third-party action
 
-If your organisation allows only approved actions, install with setup-peachq's `install.sh`. You can fetch it from a
-pinned commit and check its sha256, or copy it into your repository:
+If your organisation allows only approved actions, there are two other ways to install peachq.
+
+The first is a plain download from peachq.org with its checksum:
+
+```yaml
+- run: |
+    f=peachq-v0.92.20261116-linux-x86_64.tar.gz
+    curl -fsSLO "https://peachq.org/file/$f" -O "https://peachq.org/file/$f.sha256" && sha256sum -c "$f.sha256"
+    mkdir -p "$RUNNER_TEMP/peachq" && tar -xzf "$f" -C "$RUNNER_TEMP/peachq"
+    echo "PEACHQ_Q=$RUNNER_TEMP/peachq/q" >> "$GITHUB_ENV"
+```
+
+The second is setup-peachq's `install.sh`, fetched from a pinned commit or copied into your repository:
 
 ```yaml
 - run: |
@@ -134,8 +146,8 @@ pinned commit and check its sha256, or copy it into your repository:
     echo "PEACHQ_Q=$q" >> "$GITHUB_ENV"
 ```
 
-It verifies each download's checksum and can use your own artifact store (`PEACHQ_DIST_URL`). See the
-[setup-peachq README](https://github.com/peachq-org/setup-peachq#without-the-action).
+Either way the checksum is verified. The [setup-peachq README](https://github.com/peachq-org/setup-peachq) covers
+both: the file naming, resolving `latest`, verifying build provenance, and using your own mirror.
 
 ## Badge
 
