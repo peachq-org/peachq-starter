@@ -8,9 +8,9 @@ q that any runner may download. Click **Use this template**, or copy the workflo
 steps:
   - uses: actions/checkout@<sha>
     with: {persist-credentials: false}
-  - uses: peachq-org/setup-peachq@v1.0.0
+  - uses: peachq-org/setup-peachq@v1.1.0
     with:
-      version: 0.92.20261116
+      version: 0.92.20261118
   - run: $QCMD tests/run.q -classic
   - if: always()
     uses: actions/upload-artifact@<sha>
@@ -24,8 +24,9 @@ This repo is that workflow plus one small project:
 - `tests/run.q` runs them, writes `junit.xml`, and exits 1 if any test fails.
 
 `-classic` gives kdb+'s display and error text, so tests written against kdb+ output compare like for like. Each
-engine's arguments go after the script: `q [file] [-options]`. The workflow runs on Linux; add `macos-latest` if you
-ship on Mac. To install peachq without a third-party action, see
+engine's arguments go after the script: `q [file] [-options]`. The workflow runs on Linux; add `macos-latest` or
+`windows-latest` if you ship there. Its steps run in bash on every runner (`defaults: run: shell: bash`), so on Windows
+`$QCMD` still works instead of being an empty PowerShell variable. To install peachq without a third-party action, see
 [setup-peachq](https://github.com/peachq-org/setup-peachq#without-the-action-download-from-peachqorg).
 
 ## Just check it loads
